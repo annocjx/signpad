@@ -1,0 +1,55 @@
+apply plugin: 'com.android.library'
+
+
+Properties properties = new Properties()
+final def bintrayPropertiesFile = project.rootProject.file('bintray.properties')
+if (bintrayPropertiesFile.exists()) properties.load(bintrayPropertiesFile.newDataInputStream())
+
+android {
+    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        consumerProguardFiles 'proguard-rules-consumer.pro'
+    }
+
+    dataBinding {
+        enabled = true
+    }
+}
+
+
+//上传maven center
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.16.0'
+    }
+}
+
+allprojects {
+    plugins.withId("com.vanniktech.maven.publish") {
+        mavenPublish {
+            sonatypeHost = "S01"
+        }
+    }
+
+    tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+        // options.addStringOption('encoding', 'UTF-8')
+        options{
+            encoding "UTF-8"
+            charSet 'UTF-8'
+            links "http://docs.oracle.com/javase/11/docs/api"
+        }
+        tasks.withType(Javadoc).all {
+            enabled = false
+        }
+    }
+
+}
+
+apply plugin: "com.vanniktech.maven.publish"
